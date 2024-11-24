@@ -16,7 +16,13 @@ echo "Initial key bytes as tuple: (${initial_key_tuple[*]})"
 
 # Run aes with 17th argument as 1000, 10'000, 100'000, 1'000'000
 for i in 1000 10000 100000 1000000; do
-    echo "Running aes with 17th argument as $i"
-    sudo taskset -c 1 ./aes "${initial_key_tuple[@]}" $i
+    echo "Running aes with inner loop size as $i"
+
+    for ((j=0; j<2; j+=1)); do
+        sudo taskset -c 1 ./aes "${initial_key_tuple[@]}" $i $j
+    done
+
+    out=$(python3 comparison.py results/traces_"$i"_0.csv results/traces_"$i"_1.csv)
+    echo "Comparison result for inner loop size $i: $out"
 done
 

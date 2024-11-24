@@ -18,7 +18,7 @@
 #ifndef NUM_PT
 #define NUM_PT 50
 #endif
-#define PRINT_EVERY 50
+#define PRINT_EVERY 5
 
 std::string m128iToHexString(const __m128i &value) {
   std::ostringstream oss;
@@ -86,9 +86,10 @@ void aesEncrypt(__m128i plaintext, __m128i *roundKeys, std::string *ciphertext) 
 
 int main(int argc, char *argv[]) {
   uint8_t N = std::stoi(argv[17], nullptr, 10);
+  uint8_t run_num = std::stoi(argv[18], nullptr, 10);
   // init the measurement library
 //   std::ofstream plaintexts("results/plaintexts");
-  std::ofstream traces("results/traces_"+ std::to_string(N) +".csv");
+  std::ofstream traces("results/traces_" + std::to_string(N) + "_" + std::to_string(run_num) + ".csv");
 //   std::ofstream ciphertexts("results/ciphertexts");
 
   init();
@@ -137,7 +138,6 @@ int main(int argc, char *argv[]) {
       Measurement start = measure();
       __asm__ __volatile__("mfence");
 
-      // Profile a tight loop of nops
       for (int i = 0; i < N; ++i) {
         aesEncrypt(plaintext, roundKeys, &ciphertext);
       }
