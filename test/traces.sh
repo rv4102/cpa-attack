@@ -23,6 +23,6 @@ for i in 1000 10000 100000 1000000; do
     done
 
     out=$(python3 comparison.py results/traces_"$i"_0.csv results/traces_"$i"_1.csv)
-    echo "Comparison result for inner loop size $i: $out"
+    echo "Correlation for inner loop size $i: $out"
 done
 

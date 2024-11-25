@@ -1,6 +1,6 @@
 .SILENT:
 
-NUM_PT=2'000'000
+NUM_PT=50
 
 all: aes
 

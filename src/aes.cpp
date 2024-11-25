@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
   // parse the key
   char b[16];
   for (int i = 0; i < 16; i++) {
-    b[i] = static_cast<char>(std::stoi(argv[i + 1], nullptr, 16));
+    b[i] = static_cast<char>(strtol(argv[i + 1], nullptr, 16));
   }
   __m128i key =
       _mm_set_epi8(b[15], b[14], b[13], b[12], b[11], b[10], b[9], b[8], b[7],

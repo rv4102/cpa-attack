@@ -85,8 +85,8 @@ void aesEncrypt(__m128i plaintext, __m128i *roundKeys, std::string *ciphertext) 
 }
 
 int main(int argc, char *argv[]) {
-  uint8_t N = std::stoi(argv[17], nullptr, 10);
-  uint8_t run_num = std::stoi(argv[18], nullptr, 10);
+  long N = strtol(argv[17], nullptr, 10);
+  long run_num = strtol(argv[18], nullptr, 10);
   // init the measurement library
 //   std::ofstream plaintexts("results/plaintexts");
   std::ofstream traces("results/traces_" + std::to_string(N) + "_" + std::to_string(run_num) + ".csv");
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
                    b[6], b[5], b[4], b[3], b[2], b[1], b[0]);
   __m128i roundKeys[11];
   generateRoundKeys(key, roundKeys);
-  std::cout << "Last round key: " << m128iToHexString(roundKeys[10]) << std::endl;
+  // std::cout << "Last round key: " << m128iToHexString(roundKeys[10]) << std::endl;
   for (int pt = 0; pt < NUM_PT; pt++) {
     // generate random plaintext
     std::string ciphertext;
