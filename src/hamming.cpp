@@ -12,9 +12,9 @@
 
 #define NUM_SUB_KEY 256
 #ifndef NUM_PT
-#define NUM_PT 2'000'000
+#define NUM_PT 400
 #endif
-#define PRINT_EVERY 100'000
+#define PRINT_EVERY 50
 
 // globals
 // https://www.intel.com/content/dam/doc/white-paper/advanced-encryption-standard-new-instructions-set-paper.pdf

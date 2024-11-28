@@ -33,7 +33,16 @@ for i in {0..15}; do
     echo "Generated subkey $i: $new_subkey"
 done
 
+# read the last round key from the file
+last_round_key=$(cat results/last_round_key.txt)
+last_round_key_tuple=()
+for ((i=0; i<${#initial_key}; i+=2)); do
+    byte="0x${initial_key:i:2}"
+    last_round_key_tuple+=("$byte")
+done
+
 # Print the final list of subkeys
+echo "Last round key list: ${last_round_key_tuple[@]}"
 echo "Final list of subkeys: ${subkeys[@]}"
 
 # Actual Final Round Key:   0x06 0x14 0x96 0x15 0xdb 0x0b 0x38 0xfe 0xc5 0x28 0x61 0x38 0x22 0x6a 0x25 0xbb

@@ -12,12 +12,12 @@
 #include <time.h>
 #include <wmmintrin.h>
 
-#define S 100
-#define N 1000
+#define S 200
+#define N 1'000'000
 #ifndef NUM_PT
-#define NUM_PT 100
+#define NUM_PT 400
 #endif
-#define PRINT_EVERY 50
+#define PRINT_EVERY 10
 
 std::string m128iToHexString(const __m128i &value) {
   std::ostringstream oss;
@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
   std::ofstream plaintexts("results/plaintexts");
   std::ofstream traces("results/traces.csv");
   std::ofstream ciphertexts("results/ciphertexts");
+  std::ofstream last_round_key("results/last_round_key.txt");
 
   init();
   srand(time(NULL));
@@ -116,7 +117,9 @@ int main(int argc, char *argv[]) {
                    b[6], b[5], b[4], b[3], b[2], b[1], b[0]);
   __m128i roundKeys[11];
   generateRoundKeys(key, roundKeys);
-  std::cout << "Last round key: " << m128iToHexString(roundKeys[10]) << std::endl;
+  // std::cout << "Last round key: " << m128iToHexString(roundKeys[10]) << std::endl;
+  last_round_key << m128iToHexString(roundKeys[10]) << std::endl;
+
   for (int pt = 0; pt < NUM_PT; pt++) {
     // generate random plaintext
     std::string ciphertext;
