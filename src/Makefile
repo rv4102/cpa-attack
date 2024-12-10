@@ -1,6 +1,6 @@
 .SILENT:
 
-NUM_PT=2000000
+NUM_PT=200
 
 all: aes hamming
 	chmod +x generate_key.sh

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Initial hexadecimal key
-initial_key="FFFF00000000FFFF0F0F0F0FF0F0F0F0"
+initial_key=$(cat key.txt)
 echo "Initial key: $initial_key"
 
 # Split the initial_key into bytes and store in a tuple (array)
@@ -23,15 +23,17 @@ subkeys=()
 
 ./hamming
 
-# Loop from 0 to 15 to generate subkeys
 for i in {0..15}; do
-    new_subkey=$(python3 cpa.py results/traces.csv results/hamm"$i".csv)
+    new_subkey=$(python3 cpa.py results/traces.csv results/hamm"$i".csv "${initial_key_tuple[i]}")
     
     # Append the new subkey (output from cpa.py) to the list of subkeys
     subkeys+=("$new_subkey")
     
     echo "Generated subkey $i: $new_subkey"
 done
+
+# print the guessing entropy
+python3 guessing_entropy.py
 
 # read the last round key from the file
 last_round_key=$(cat results/last_round_key.txt)
