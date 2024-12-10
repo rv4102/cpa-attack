@@ -12,7 +12,7 @@
 #include <time.h>
 #include <wmmintrin.h>
 
-#define S 200
+#define S 100
 #define N 1'000'000
 #ifndef NUM_PT
 #define NUM_PT 400
