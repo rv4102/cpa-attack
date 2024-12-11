@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print("Usage: python cpa.py <traces_file> <hamm_file> <correct_key_byte>")
         sys.exit(1)
 
@@ -35,7 +35,7 @@ def main():
     correct_key_byte_index += 1  # 1-indexed
 
     # write to file
-    with open("results/guessing_entropy.txt", "w") as f:
+    with open("results/guessing_entropy.txt", "a+") as f:
         f.write(str(correct_key_byte_index))
 
     # print Hex value of the guessed key
