@@ -34,9 +34,8 @@ def main():
     correct_key_byte_index = max_values[max_values == correct_key_byte].index[0]
     correct_key_byte_index += 1  # 1-indexed
 
-    # write to file
     with open("results/guessing_entropy.txt", "a+") as f:
-        f.write(str(correct_key_byte_index))
+        f.write(str(correct_key_byte_index) + "\n")
 
     # print Hex value of the guessed key
     print(hex(guessed_key))

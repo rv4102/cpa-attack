@@ -23,6 +23,7 @@ subkeys=()
 
 ./hamming
 
+> results/guessing_entropy.txt
 for i in {0..15}; do
     new_subkey=$(python3 cpa.py results/traces.csv results/hamm"$i".csv "${initial_key_tuple[i]}")
     
