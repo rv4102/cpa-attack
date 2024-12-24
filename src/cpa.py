@@ -13,15 +13,17 @@ def main():
     correct_key_byte = sys.argv[3]
     correct_key_byte = int(correct_key_byte, 16)
 
-    H = pd.read_csv(leakages_file, header=None).T
-    T = pd.read_csv(traces_file, header=None).T
+    T = pd.read_csv(traces_file, header=None)
+    H = pd.read_csv(leakages_file, header=None)
 
-    T_normalized = (T - T.mean()) / T.std()
-    H_normalized = (H - H.mean()) / H.std()
+    coeff_shape = [T.shape[1], H.shape[1]]
 
-    # Compute the correlation matrix
-    correlation_matrix = np.dot(T_normalized.values, H_normalized.values.T) / T.shape[1]
-    correlation_df = pd.DataFrame(correlation_matrix, index=T.index, columns=H.index)
+    # Column-wise Pearson's correlation coefficient matrix
+    correlation_matrix = np.corrcoef(T.values, H.values, rowvar=False)
+    correlation_matrix = correlation_matrix[: coeff_shape[0], coeff_shape[0] :]
+    correlation_df = pd.DataFrame(
+        correlation_matrix, index=T.columns, columns=H.columns
+    )
     correlation_df.to_csv("results/correlation.csv", header=False, index=False)
     max_index = correlation_df.stack().idxmax()
     guessed_key = max_index[1]
