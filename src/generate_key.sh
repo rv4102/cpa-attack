@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Initial hexadecimal key
-initial_key=$(cat key.txt)
+initial_key=$(cat result/initial_key.txt)
 echo "Initial key: $initial_key"
 
 # Split the initial_key into bytes and store in a tuple (array)

@@ -8,14 +8,14 @@ all: aes hamming
 lib:
 	make -C ../measure/
 
-aes: lib aes.cpp
+aes: lib aes.cpp utils.cpp
 	g++ -DNUM_PT=${NUM_PT} -maes aes.cpp -L../measure -I../measure -l:libmeasure.a -o aes
 
-hamming: hamming.cpp
+hamming: hamming.cpp utils.cpp
 	g++ -DNUM_PT=${NUM_PT} -mssse3 -maes hamming.cpp -o hamming
 
 run: aes hamming
-	./generate_key.sh ${NUM_PT}
+	./generate_key.sh
 
 clean:
 	make -C ../measure/ clean
