@@ -9,10 +9,10 @@ lib:
 	make -C ../measure/
 
 aes: lib aes.cpp utils.cpp
-	g++ -DNUM_PT=${NUM_PT} -maes aes.cpp -L../measure -I../measure -l:libmeasure.a -o aes
+	g++ -DNUM_PT=${NUM_PT} -mssse3 -maes aes.cpp utils.cpp -L../measure -I../measure -l:libmeasure.a -o aes
 
 hamming: hamming.cpp utils.cpp
-	g++ -DNUM_PT=${NUM_PT} -mssse3 -maes hamming.cpp -o hamming
+	g++ -DNUM_PT=${NUM_PT} -mssse3 -maes hamming.cpp utils.cpp -o hamming
 
 run: aes hamming
 	./generate_key.sh
