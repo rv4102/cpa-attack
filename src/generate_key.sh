@@ -33,7 +33,7 @@ subkeys=()
 
 > results/guessing_entropy.txt
 for i in {0..15}; do
-    new_subkey=$(python3 cpa.py results/traces.csv results/hamm"$i".csv "${last_round_key_tuple[i]}")
+    new_subkey=$(python3 cpa.py results/traces.csv results/hamm"$i".csv "${initial_key_tuple[i]}")
     
     # Append the new subkey (output from cpa.py) to the list of subkeys
     subkeys+=("$new_subkey")
@@ -45,7 +45,7 @@ done
 python3 guessing_entropy.py
 
 # Print the final list of subkeys
-echo "Last round key list: ${last_round_key_tuple[@]}"
+echo "Initial key list: ${initial_key_tuple[@]}"
 echo "Final list of subkeys: ${subkeys[@]}"
 
 # Actual Final Round Key:   0x06 0x14 0x96 0x15 0xdb 0x0b 0x38 0xfe 0xc5 0x28 0x61 0x38 0x22 0x6a 0x25 0xbb
