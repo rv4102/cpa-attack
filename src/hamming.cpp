@@ -23,21 +23,19 @@ int main(int argc, char *argv[]) {
         ciphertexts >> ciphertext;
 
         for (int j = 0; j < NUM_SUB_KEY; j++) {
-            __m128i sub_key = _mm_set_epi8(j,j,j,j,j,j,j,j,j,j,j,j,j,j,j,j);
+            char b[16];
+            for (int k = 0; k < 16; k++) {
+                b[k] = j;
+            }
+            __m128i sub_key = _mm_loadu_si128((const __m128i*)b);
             __m128i sbox_inv = performInvSubBytes(_mm_xor_si128(ciphertext, sub_key));
             std::string inv_sbox_output = m128iToHexString(sbox_inv);
 
             for (int k = 0; k < 16; k++) {
                 int byte = std::stoi(inv_sbox_output.substr(k*2, 2), nullptr, 16);
-                hamm[k] << hammingWeight(byte);
-                if (j < NUM_SUB_KEY-1) {
-                    hamm[k] << ",";
-                }
+                hamm[k] << hammingWeight(byte) << ((j < NUM_SUB_KEY - 1) ? "," : "\n");
             }
         }
-
-        for (int k = 0; k < 16; k++)
-            hamm[k] << "\n";
 
         if((i+1) % PRINT_EVERY == 0)
             std::cout << "Completed " << (i+1) << std::endl;
