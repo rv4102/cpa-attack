@@ -14,7 +14,7 @@
 int main(int argc, char *argv[]) {
     // std::ifstream ciphertexts("results/ciphertexts");
     std::ifstream plaintexts("results/plaintexts"), initial_key("results/initial_key.txt");
-    std::ofstream hamm[16];
+    std::ofstream hamm[16], first_round_key("results/first_round_key.txt");
     for (int i = 0; i < 16; i++) {
         hamm[i] = std::ofstream("results/hamm" + std::to_string(i) + ".csv");
     }
@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
     __m128i key, roundKeys[11];
     initial_key >> key;
     generateRoundKeys(key, roundKeys);
+    first_round_key << roundKeys[0] << std::endl;
 
     for (int i = 0; i < NUM_PT; i++) {
         // __m128i ciphertext;
