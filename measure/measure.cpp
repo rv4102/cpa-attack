@@ -48,8 +48,8 @@ uint64_t read_rapl() {
 #else
   uint64_t value;
   ssize_t n = pread(fd, &value, 8, 0x00000612);
-  // uint64_t mask = 0xFFFFFFFF;
-  // value = (value & mask); // get lower 32 bits
+  uint64_t mask = 0xFFFFFFFF;
+  value = (value & mask); // get lower 32 bits
   assert(n == 8);
   return value;
 #endif
