@@ -25,16 +25,13 @@ int main(int argc, char *argv[]) {
 
     // warmup
     for (int s = 0; s < 10; ++s) {
-        Measurement start = measure();
         __asm__ __volatile__("mfence");
         // Profile a tight loop of nops
         for (int i = 0; i < N; ++i) {
-        __asm__ __volatile__("nop");
-        __asm__ __volatile__("mfence");
+            __asm__ __volatile__("nop");
+            __asm__ __volatile__("mfence");
         }
         __asm__ __volatile__("mfence");
-        Measurement stop = measure();
-        Sample sample = convert(start, stop);
     }
 
     __m128i key, roundKeys[11];
@@ -53,15 +50,21 @@ int main(int argc, char *argv[]) {
 
         // measurement
         for (int s = 0; s < S; ++s) {
-            Measurement start = measure();
+            // warm-up
+            __asm__ __volatile__("mfence");
+            for (int i = 0; i < 1000; ++i) {
+                aesEncrypt(plaintext, roundKeys, &ciphertext);
+            }
             __asm__ __volatile__("mfence");
 
-            // Profile a tight loop of nops
+            Measurement start = measure();
+
+            __asm__ __volatile__("mfence");
             for (int i = 0; i < N; ++i) {
                 aesEncrypt(plaintext, roundKeys, &ciphertext);
             }
-
             __asm__ __volatile__("mfence");
+
             Measurement stop = measure();
             Sample sample = convert(start, stop);
 
