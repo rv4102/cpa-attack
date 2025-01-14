@@ -1,6 +1,6 @@
 .SILENT:
 
-NUM_PT=300
+NUM_PT=5000000
 
 all: aes hamming
 	chmod +x generate_key.sh
@@ -23,3 +23,6 @@ run: aes hamming
 clean:
 	make -C ../measure/ clean
 	rm hamming aes
+
+clean_data:
+	rm -f results/*texts results/traces.csv results/hamm*.csv

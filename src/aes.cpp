@@ -5,7 +5,7 @@
 #include <fstream>
 
 #define S 100
-#define N 1'000'000
+#define N 1500
 #ifndef NUM_PT
 #define NUM_PT 400
 #endif
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     // init the measurement library
     std::ofstream plaintexts("results/plaintexts");
     std::ofstream traces("results/traces.csv");
-    // std::ofstream ciphertexts("results/ciphertexts");
+    std::ofstream ciphertexts("results/ciphertexts");
     std::ofstream last_round_key("results/last_round_key.txt");
     std::ifstream initial_key("results/initial_key.txt");
 
@@ -48,15 +48,15 @@ int main(int argc, char *argv[]) {
         __m128i plaintext = _mm_loadu_si128((const __m128i*)b);
         plaintexts << plaintext << std::endl;
 
+        // warm-up
+        __asm__ __volatile__("mfence");
+        for (int i = 0; i < 1000; ++i) {
+            aesEncrypt(plaintext, roundKeys, &ciphertext);
+        }
+        __asm__ __volatile__("mfence");
+
         // measurement
         for (int s = 0; s < S; ++s) {
-            // warm-up
-            __asm__ __volatile__("mfence");
-            for (int i = 0; i < 1000; ++i) {
-                aesEncrypt(plaintext, roundKeys, &ciphertext);
-            }
-            __asm__ __volatile__("mfence");
-
             Measurement start = measure();
 
             __asm__ __volatile__("mfence");
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
             traces << sample.energy << ((s < S - 1) ? "," : "\n");
         }
-        // ciphertexts << ciphertext << std::endl;
+        ciphertexts << ciphertext << std::endl;
 
         if ((pt + 1) % PRINT_EVERY == 0)
             std::cout << "Processed " << pt + 1 << " plaintexts" << std::endl;
