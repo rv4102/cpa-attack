@@ -8,7 +8,7 @@ all: aes hamming
 lib:
 	make -C ../measure/
 
-time:
+time: lib utils.cpp
 	g++ -mssse3 -maes time.cpp utils.cpp -L../measure -I../measure -l:libmeasure.a -o time
 
 aes: lib aes.cpp utils.cpp
