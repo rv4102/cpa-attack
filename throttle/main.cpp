@@ -6,8 +6,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define S 200000
-#define N 250000
+#define S 2000
+#define N 2500000
 
 int main(int argc, char *argv[]) {
 
