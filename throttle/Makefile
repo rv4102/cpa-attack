@@ -6,7 +6,7 @@ lib:
 	make -C ../measure/
 
 controller:
-	g++ controller.cpp
+	g++ controller.cpp -o controller
 
 main: lib controller main.cpp
 	g++ main.cpp -L../measure -I../measure -l:libmeasure.a -o main
