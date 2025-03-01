@@ -10,5 +10,10 @@
 src/results
 .DS_Store
 test/results
+
+# ignore all libraries
 *.a
 *.o
+*.so
+
+aes_ipp/
