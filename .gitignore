@@ -1,3 +1,14 @@
+# ignore all
+*
+
+# unignore all files with extensions
+!*.*
+
+# unignore all directories
+!*/
+
 src/results
 .DS_Store
 test/results
+*.a
+*.o
