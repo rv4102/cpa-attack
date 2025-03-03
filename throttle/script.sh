@@ -93,7 +93,7 @@ function run_test() {
     
     # Run TVLA analysis
     echo "Running TVLA analysis..."
-    TVLA_RESULT=$(python3 test.py zero.csv full.csv | grep "TVLA Test Result:" | awk '{print $4}')
+    TVLA_RESULT=$(python3 test.py zero.csv full.csv "$power" | grep "TVLA Test Result:" | awk '{print $4}')
     
     echo "TVLA Result: $TVLA_RESULT"
     

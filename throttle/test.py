@@ -1,6 +1,7 @@
 from scipy import stats
 import pandas as pd
 import sys
+import matplotlib.pyplot as plt
 
 
 def tvla(data1, data2, alpha=4.5):
@@ -18,4 +19,10 @@ def tvla(data1, data2, alpha=4.5):
 if __name__ == "__main__":
     file1 = pd.read_csv(sys.argv[1])
     file2 = pd.read_csv(sys.argv[2])
-    print("TVLA Test Result: ", tvla(file1, file2))
+
+    print("TVLA Test Result: ", tvla(file1.values, file2.values))
+    # create plot comparing file1 and file2
+    plt.plot(file1, label=sys.argv[1])
+    plt.plot(file2, label=sys.argv[2])
+    plt.legend()
+    plt.savefig("plot_" + sys.argv[3] + ".png")
