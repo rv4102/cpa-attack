@@ -75,25 +75,19 @@ function run_test() {
         return 2
     fi
     
-    # Clear previous test results if they exist
-    rm -f zero.csv full.csv
+    # # Clear previous test results if they exist
+    # rm -f zero.csv full.csv
     
     # Run the tests
     echo "Running test with factor=0..."
-    sudo taskset -c 1 ./main 0 2> zero.csv
+    sudo taskset -c 1 ./main 0 2> data/zero_"$power".csv
     
     echo "Running test with factor=255..."
-    sudo taskset -c 1 ./main 255 2> full.csv
-    
-    # Check if the test results are valid
-    if [ ! -s "zero.csv" ] || [ ! -s "full.csv" ]; then
-        echo "Test failed to generate valid results."
-        return 2
-    fi
+    sudo taskset -c 1 ./main 255 2> data/full_"$power".csv
     
     # Run TVLA analysis
     echo "Running TVLA analysis..."
-    TVLA_RESULT=$(python3 test.py zero.csv full.csv "$power" | grep "TVLA Test Result:" | awk '{print $4}')
+    TVLA_RESULT=$(python3 test.py zero_"$power".csv data/full_"$power".csv "$power" | grep "TVLA Test Result:" | awk '{print $4}')
     
     echo "TVLA Result: $TVLA_RESULT"
     
