@@ -22,6 +22,9 @@ CLAMP2=0
 TIME_WINDOW1=15  # 0xF
 TIME_WINDOW2=15  # 0xF
 
+NUM_CORES=4
+
+
 # Output file for results
 RESULTS_FILE="platypus_results.log"
 echo "Power Limit, TVLA Result" > $RESULTS_FILE
@@ -66,8 +69,9 @@ echo "Will decrease by $POWER_STEP until leakage is detected or minimum $MIN_POW
 # Function to run the test with current power settings
 function run_test() {
     local power=$1
+    local num_cores=$2  # New parameter for number of cores
     
-    echo "Testing with power limit: $power"
+    echo "Testing with power limit: $power on $num_cores cores"
     
     # Set the power limit using the controller
     echo "Setting power limit..."
@@ -77,15 +81,12 @@ function run_test() {
         return 2
     fi
     
-    # # Clear previous test results if they exist
-    # rm -f zero.csv full.csv
-    
     # Run the tests
-    echo "Running test with factor=0..."
-    sudo taskset -c 1 ./main 0 2> data/zero_"$power".csv
+    echo "Running test with factor=0 on $num_cores cores..."
+    sudo taskset -c 0-$((num_cores-1)) ./multi_core_main 0 $num_cores 2> data/zero_"$power".csv
     
-    echo "Running test with factor=255..."
-    sudo taskset -c 1 ./main 255 2> data/full_"$power".csv
+    echo "Running test with factor=255 on $num_cores cores..."
+    sudo taskset -c 0-$((num_cores-1)) ./multi_core_main 255 $num_cores 2> data/full_"$power".csv
     
     # Run TVLA analysis
     echo "Running TVLA analysis..."
@@ -94,7 +95,7 @@ function run_test() {
     echo "TVLA Result: $TVLA_RESULT"
     
     # Log result
-    echo "$power, $TVLA_RESULT" >> $RESULTS_FILE
+    echo "$power, $TVLA_RESULT, $num_cores cores" >> $RESULTS_FILE
     
     # Return the TVLA result (1 = leakage detected, 0 = no leakage)
     return $TVLA_RESULT
@@ -106,9 +107,9 @@ SUCCESS_POWER=0
 
 while [ $CURRENT_POWER -ge $MIN_POWER ] && [ $LEAK_DETECTED -eq 0 ]; do
     echo "============================================"
-    echo "Testing power limit: $CURRENT_POWER"
+    echo "Testing power limit: $CURRENT_POWER with $NUM_CORES cores"
     
-    run_test $CURRENT_POWER
+    run_test $CURRENT_POWER $NUM_CORES
     TEST_RESULT=$?
     
     if [ $TEST_RESULT -eq 1 ]; then
