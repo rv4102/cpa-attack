@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ../.venv/bin/activate
+
 # Platypus Attack Power Tuning Script
 # This script finds the optimal power limit for the Platypus attack by
 # gradually reducing the power limit until TVLA leakage is detected
@@ -87,7 +89,7 @@ function run_test() {
     
     # Run TVLA analysis
     echo "Running TVLA analysis..."
-    TVLA_RESULT=$(python3 test.py zero_"$power".csv data/full_"$power".csv "$power" | grep "TVLA Test Result:" | awk '{print $4}')
+    TVLA_RESULT=$(python3 test.py data/zero_"$power".csv data/full_"$power".csv "$power" | grep "TVLA Test Result:" | awk '{print $4}')
     
     echo "TVLA Result: $TVLA_RESULT"
     

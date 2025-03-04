@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #define S 2000
-#define N 2500000
+#define N 25000000
 
 int main(int argc, char *argv[]) {
 
