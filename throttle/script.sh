@@ -26,8 +26,8 @@ NUM_CORES=4
 
 
 # Output file for results
-RESULTS_FILE="platypus_results.log"
-echo "Power Limit, TVLA Result" > $RESULTS_FILE
+RESULTS_FILE="data/platypus_results.log"
+echo "Power Limit, TVLA Result, Num Cores" > $RESULTS_FILE
 
 # Check if user is root
 if [ "$EUID" -ne 0 ]; then
