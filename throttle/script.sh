@@ -46,22 +46,6 @@ if ! lsmod | grep -q "^msr "; then
     fi
 fi
 
-# Compile the controller
-echo "Compiling controller..."
-make controller
-if [ ! -f "./controller" ]; then
-    echo "Failed to compile controller. Check for compilation errors."
-    exit 1
-fi
-
-# Compile the main program
-echo "Compiling main program..."
-make main
-if [ ! -f "./main" ]; then
-    echo "Failed to compile main program. Check for compilation errors."
-    exit 1
-fi
-
 echo "===== Platypus Attack Power Limit Tuner ====="
 echo "Starting with power limit: $CURRENT_POWER"
 echo "Will decrease by $POWER_STEP until leakage is detected or minimum $MIN_POWER is reached"

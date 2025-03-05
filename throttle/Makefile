@@ -1,6 +1,6 @@
 .SILENT:
 
-all: main
+all: multi_core_main
 
 lib:
 	make -C ../measure/
