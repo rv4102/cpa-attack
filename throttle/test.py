@@ -25,4 +25,4 @@ if __name__ == "__main__":
     plt.plot(file1, label=sys.argv[1])
     plt.plot(file2, label=sys.argv[2])
     plt.legend()
-    plt.savefig("plot_" + sys.argv[3] + ".png")
+    plt.savefig("data/plot_" + sys.argv[3] + ".png")
