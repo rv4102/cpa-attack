@@ -1,6 +1,6 @@
 .SILENT:
 
-NUM_PT=5000000
+NUM_PT=400
 
 all: aes hamming
 	chmod +x generate_key.sh
@@ -11,8 +11,8 @@ lib:
 time: lib utils.cpp
 	g++ -mssse3 -maes time.cpp utils.cpp -L../measure -I../measure -l:libmeasure.a -o time
 
-aes: lib aes.cpp utils.cpp
-	g++ -DNUM_PT=${NUM_PT} -mssse3 -maes aes.cpp utils.cpp -L../measure -I../measure -l:libmeasure.a -o aes
+aes: lib aes.cpp
+	g++ -DNUM_PT=${NUM_PT} -mssse3 -maes aes.cpp -L../measure -L/home/sdp/intel/oneapi/ippcp/2025.0/lib -I../measure -I/home/sdp/intel/oneapi/ippcp/2025.0/include -l:libmeasure.a -lippcp -o aes -Wl,-R/home/sdp/intel/oneapi/ippcp/2025.0/lib
 
 hamming: hamming.cpp utils.cpp
 	g++ -DNUM_PT=${NUM_PT} -mssse3 -maes hamming.cpp utils.cpp -o hamming

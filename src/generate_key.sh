@@ -1,16 +1,5 @@
 #!/bin/bash
 
-# Initial hexadecimal key
-initial_key=$(cat results/initial_key.txt)
-echo "Initial key: $initial_key"
-
-# Split the initial_key into bytes and store in a tuple (array)
-initial_key_tuple=()
-for ((i=0; i<${#initial_key}; i+=2)); do
-    byte="0x${initial_key:i:2}"
-    initial_key_tuple+=("$byte")
-done
-
 # Print the tuple containing each byte of the initial key
 echo "Initial key bytes as tuple: (${initial_key_tuple[*]})"
 
