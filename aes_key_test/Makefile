@@ -16,4 +16,4 @@ aes: lib aes.cpp
 	
 clean:
 	make -C ../measure/ clean
-	rm -r aes controller zero.csv full.csv
+	rm -r aes controller
