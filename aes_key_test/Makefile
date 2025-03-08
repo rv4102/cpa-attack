@@ -1,9 +1,6 @@
 .SILENT:
 
-all: aes
-	mkdir -p data
-	sudo taskset -c 0-3 ./aes 0 2> data/zero.csv
-	sudo taskset -c 0-3 ./aes 1 2> data/full.csv
+all: aes controller
 
 lib:
 	make -C ../measure/
