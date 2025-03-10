@@ -18,7 +18,7 @@ std::atomic<int> threads_ready(0);
 std::atomic<bool> start_execution(false);
 
 
-const Ipp8u* ptext;
+Ipp8u ptext[17];
 Ipp8u* ctext;
 IppsAESSpec* pAES;
 
@@ -56,13 +56,13 @@ int main(int argc, char *argv[]) {
         __asm__ __volatile__("mfence");
     }
 
-    const Ipp8u* key;
-    if(strcmp(argv[1], "0")) {
-        ptext = "\x00\x00\x00\x00\x00\x00\x00\x00"
+    Ipp8u key[] = "\x00\x00\x00\x00\x00\x00\x00\x00"
         "\x00\x00\x00\x00\x00\x00\x00\x00";
+
+    if(strcmp(argv[1], "0")) {
+        memset(ptext, 0x00, sizeof(ptext));
     } else {
-        ptext = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-        "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
+        memset(ptext, 0xFF, sizeof(ptext));
     }
     
     int ctxSize;
