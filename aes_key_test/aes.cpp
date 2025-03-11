@@ -8,8 +8,8 @@
 #include <pthread.h>
 #include <atomic>
 
-#define S 1000
-#define N 25000
+#define S 5000
+#define N 50000
 #define NUM_THREADS 4
 
 
@@ -19,7 +19,7 @@ std::atomic<bool> start_execution(false);
 
 
 Ipp8u ptext[17];
-Ipp8u* ctext;
+Ipp8u ctext[17];
 IppsAESSpec* pAES;
 
 
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     }
     ptext[16] = '\0';
 
-    std::cout << ptext << std::endl;
+    // std::cout << ptext << std::endl;
     
     int ctxSize;
     ippsAESGetSize(&ctxSize);
