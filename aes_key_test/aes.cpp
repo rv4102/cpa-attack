@@ -60,10 +60,13 @@ int main(int argc, char *argv[]) {
         "\x00\x00\x00\x00\x00\x00\x00\x00";
 
     if(strcmp(argv[1], "0")) {
-        memset(ptext, 0x00, sizeof(ptext));
+        memset(ptext, 0x00, sizeof(ptext)-1);
     } else {
-        memset(ptext, 0xFF, sizeof(ptext));
+        memset(ptext, 0xFF, sizeof(ptext)-1);
     }
+    ptext[16] = '\0';
+
+    std::cout << ptext << std::endl;
     
     int ctxSize;
     ippsAESGetSize(&ctxSize);
