@@ -19,3 +19,6 @@ test/results
 *.so
 
 aes_ipp/
+.venv
+.*
+
