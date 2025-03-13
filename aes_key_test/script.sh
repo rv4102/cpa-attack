@@ -26,7 +26,7 @@ NUM_CORES=4
 
 
 # Output file for results
-RESULTS_FILE="data/platypus_results.log"
+RESULTS_FILE="data/aes_results.log"
 echo "Power Limit, TVLA Result, Num Cores" > $RESULTS_FILE
 
 # Check if user is root
@@ -46,7 +46,7 @@ if ! lsmod | grep -q "^msr "; then
     fi
 fi
 
-echo "===== Platypus Attack Power Limit Tuner ====="
+echo "===== AES Attack Power Limit Tuner ====="
 echo "Starting with power limit: $CURRENT_POWER"
 echo "Will decrease by $POWER_STEP until leakage is detected or minimum $MIN_POWER is reached"
 
@@ -67,10 +67,10 @@ function run_test() {
     
     # Run the tests
     echo "Running test with factor=0 on $num_cores cores..."
-    sudo taskset -c 0-$((num_cores-1)) ./multi_core_main 0 $num_cores 2> data/zero_"$power".csv
+    sudo taskset -c 0-$((num_cores-1)) ./aes 0 2> data/zero_"$power".csv
     
     echo "Running test with factor=255 on $num_cores cores..."
-    sudo taskset -c 0-$((num_cores-1)) ./multi_core_main 255 $num_cores 2> data/full_"$power".csv
+    sudo taskset -c 0-$((num_cores-1)) ./aes 1 2> data/full_"$power".csv
     
     # Run TVLA analysis
     echo "Running TVLA analysis..."
@@ -112,8 +112,8 @@ done
 # Summarize results
 echo "============================================"
 if [ $LEAK_DETECTED -eq 1 ]; then
-    echo "Platypus attack successful!"
-    echo "The optimal power limit for running the Platypus attack is: $SUCCESS_POWER"
+    echo "AES attack successful!"
+    echo "The optimal power limit for running the AES attack is: $SUCCESS_POWER"
 else
     echo "No leakage detected at any tested power limit (down to $MIN_POWER)."
     echo "Try adjusting other parameters or checking hardware compatibility."

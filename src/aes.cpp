@@ -1,24 +1,53 @@
 #include "../measure/measure.h"
-#include "utils.hpp"
 
 #include <iostream>
 #include <fstream>
+#include <ippcp.h>
+#include <string.h>
+#include <vector>
+#include <pthread.h>
+#include <atomic>
 
-#define S 100
-#define N 1500
+#define S 500
+#define N 50000
 #ifndef NUM_PT
 #define NUM_PT 400
 #endif
-#define PRINT_EVERY 10
+#define PRINT_EVERY 100
+#define NUM_THREADS 4
+
+
+std::atomic<int> threads_completed(0);
+std::atomic<int> threads_ready(0);
+std::atomic<bool> start_execution(false);
+
+
+Ipp8u ptext[17], ctext[17];
+IppsAESSpec* pAES;
+
+
+void* run_workload(void* arg) {
+    threads_ready++;
+
+    while (!start_execution.load()) {
+        // Busy wait
+    }
+    
+    __asm__ __volatile__("mfence");
+    for (int i = 0; i < N; ++i) {
+        ippsAESEncryptECB(ptext, ctext, sizeof(ptext), pAES);
+    }
+    __asm__ __volatile__("mfence");
+
+    threads_completed++;
+    return NULL;
+}
 
 
 int main(int argc, char *argv[]) {
-    // init the measurement library
-    std::ofstream plaintexts("results/plaintexts");
+    std::ofstream plaintexts("results/plaintexts.txt");
+    // std::ofstream ciphertexts("results/ciphertexts");
     std::ofstream traces("results/traces.csv");
-    std::ofstream ciphertexts("results/ciphertexts");
-    std::ofstream last_round_key("results/last_round_key.txt");
-    std::ifstream initial_key("results/initial_key.txt");
 
     init();
     srand(time(NULL));
@@ -34,43 +63,55 @@ int main(int argc, char *argv[]) {
         __asm__ __volatile__("mfence");
     }
 
-    __m128i key, roundKeys[11];
-    initial_key >> key;
-    generateRoundKeys(key, roundKeys);
-    last_round_key << roundKeys[10] << std::endl;
+    Ipp8u key[17];
+    memset(key, 0x00, sizeof(key));
+    
+    int ctxSize;
+    ippsAESGetSize(&ctxSize);
+    pAES = (IppsAESSpec*)( new Ipp8u [ctxSize] );
+    ippsAESInit(key, sizeof(key)-1, pAES, ctxSize);
+    ptext[16] = '\0';
 
     for (int pt = 0; pt < NUM_PT; pt++) {
-        std::string ciphertext;
-        char b[16];
-        for (int i = 0; i < 16; i++) {
-            b[i] = rand() % 256;
-        }
-        __m128i plaintext = _mm_loadu_si128((const __m128i*)b);
-        plaintexts << plaintext << std::endl;
+        for (int i = 0; i < 16; i++)
+            ptext[i] = 97 + (rand() % 26); // all lowercase letters
+        plaintexts << ptext << std::endl;
 
         // warm-up
         __asm__ __volatile__("mfence");
-        for (int i = 0; i < 1000; ++i) {
-            aesEncrypt(plaintext, roundKeys, &ciphertext);
+        for (int i = 0; i < 100; ++i) {
+            ippsAESEncryptECB(ptext, ctext, sizeof(ptext), pAES);
         }
         __asm__ __volatile__("mfence");
 
         // measurement
         for (int s = 0; s < S; ++s) {
-            Measurement start = measure();
+            threads_completed = 0;
+            threads_ready = 0;
+            start_execution = false;
 
-            __asm__ __volatile__("mfence");
-            for (int i = 0; i < N; ++i) {
-                aesEncrypt(plaintext, roundKeys, &ciphertext);
+            std::vector<pthread_t> threads(NUM_THREADS);
+            for(int t = 0; t < NUM_THREADS; ++t) {
+                pthread_create(&threads[t], NULL, run_workload, NULL);
             }
-            __asm__ __volatile__("mfence");
 
+            while (threads_ready.load() < NUM_THREADS) {
+                // wait for threads to be ready
+            }
+
+            Measurement start = measure();
+            start_execution = true;
+            while (threads_completed.load() < NUM_THREADS) {
+                // wait for threads to complete
+            }
             Measurement stop = measure();
+            for (int t = 0; t < NUM_THREADS; ++t) {
+                pthread_join(threads[t], NULL);
+            }
             Sample sample = convert(start, stop);
-
             traces << sample.energy << ((s < S - 1) ? "," : "\n");
         }
-        ciphertexts << ciphertext << std::endl;
+        // ciphertexts << ctext << std::endl;
 
         if ((pt + 1) % PRINT_EVERY == 0)
             std::cout << "Processed " << pt + 1 << " plaintexts" << std::endl;
