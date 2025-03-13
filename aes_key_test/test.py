@@ -61,9 +61,13 @@ if __name__ == "__main__":
     file1 = pd.read_csv(sys.argv[1], header=None)
     file2 = pd.read_csv(sys.argv[2], header=None)
 
+    # filter out the first row
+    file1 = file1.iloc[1:]
+    file2 = file2.iloc[1:]
+
     print("TVLA Test Result: ", tvla(file1.values, file2.values))
     time_series_plot(file1, file2, sys.argv[3])
 
-    # file1 = filter(file1)
-    # file2 = filter(file2)
-    # freq_plot(file1, file2, sys.argv[3])
+    file1 = filter(file1)
+    file2 = filter(file2)
+    freq_plot(file1, file2, sys.argv[3])
