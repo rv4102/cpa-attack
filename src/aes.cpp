@@ -8,12 +8,12 @@
 #include <pthread.h>
 #include <atomic>
 
-#define S 50
-#define N 1000
+#define S 500
+#define N 50000
 #ifndef NUM_PT
 #define NUM_PT 400
 #endif
-#define PRINT_EVERY 50
+#define PRINT_EVERY 100
 #define NUM_THREADS 4
 
 
@@ -45,8 +45,7 @@ void* run_workload(void* arg) {
 
 
 int main(int argc, char *argv[]) {
-    // init the measurement library
-    std::ofstream plaintexts("results/plaintexts");
+    std::ofstream plaintexts("results/plaintexts.txt");
     // std::ofstream ciphertexts("results/ciphertexts");
     std::ofstream traces("results/traces.csv");
 
@@ -64,20 +63,14 @@ int main(int argc, char *argv[]) {
         __asm__ __volatile__("mfence");
     }
 
-    const Ipp8u* key;
-    if(strcmp(argv[1], "0")) {
-        key = "\x00\x00\x00\x00\x00\x00\x00\x00"
-        "\x00\x00\x00\x00\x00\x00\x00\x00";
-    } else {
-        key = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-        "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
-    }
+    Ipp8u key[17];
+    memset(key, 0x00, sizeof(key));
     
     int ctxSize;
     ippsAESGetSize(&ctxSize);
     pAES = (IppsAESSpec*)( new Ipp8u [ctxSize] );
     ippsAESInit(key, sizeof(key)-1, pAES, ctxSize);
-    ptext[16] = '\x00';
+    ptext[16] = '\0';
 
     for (int pt = 0; pt < NUM_PT; pt++) {
         for (int i = 0; i < 16; i++)
