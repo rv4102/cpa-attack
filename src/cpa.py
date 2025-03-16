@@ -40,7 +40,7 @@ def main():
         f.write(str(correct_key_byte_index) + "\n")
 
     # print Hex value of the guessed key
-    print(hex(guessed_key))
+    print(f"{guessed_key:02x}")
 
 
 if __name__ == "__main__":

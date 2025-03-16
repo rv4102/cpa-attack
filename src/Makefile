@@ -22,4 +22,4 @@ clean:
 	rm hamming aes controller
 
 clean_data:
-	rm -f results/*texts results/traces.csv results/hamm*.csv
+	rm -f results/*texts.txt results/traces.csv results/hamm*.csv results/key_ranks.txt
