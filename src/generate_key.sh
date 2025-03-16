@@ -37,12 +37,12 @@ echo "[+] Setting power limits"
 
 # Generate traces and plaintexts
 echo "[+] Generating power traces and plaintexts..."
-sudo taskset -c 0-3 ./aes
+#sudo taskset -c 0-3 ./aes
 echo "[+] Traces saved to results/traces.csv"
 echo "[+] Plaintexts saved to results/plaintexts.txt"
 # generate hamming weights
 echo "[+] Generating hamming weight model..."
-./hamming
+#./hamming
 echo "[+] Hamming weights saved to results/hamm<i>.csv"
 
 
@@ -66,16 +66,10 @@ for i in {0..15}; do
     echo "    Running CPA analysis..."
     BYTE_RESULT=$(python3 cpa.py results/traces.csv results/hamm${i}.csv $CORRECT_BYTE)
     
-    # Extract the guessed key byte
-    GUESSED_BYTE=$(echo "$BYTE_RESULT" | grep "Best key guess" | awk '{print $4}')
-    
     # Append to the recovered key
-    RECOVERED_KEY="${RECOVERED_KEY}${GUESSED_BYTE}"
+    RECOVERED_KEY="${RECOVERED_KEY}${BYTE_RESULT}"
     
-    # Save detailed results
-    echo "$BYTE_RESULT" > "results/byte_${i}_result.txt"
-    
-    echo "    Key byte $i: $GUESSED_BYTE"
+    echo "    Key byte $i: $BYTE_RESULT"
 done
 
 # Save the full recovered key
