@@ -8,7 +8,7 @@
 #include <pthread.h>
 #include <atomic>
 
-#define S 500
+#define S 5000
 #define N 50000
 #ifndef NUM_PT
 #define NUM_PT 400

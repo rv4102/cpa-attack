@@ -37,12 +37,12 @@ echo "[+] Setting power limits"
 
 # Generate traces and plaintexts
 echo "[+] Generating power traces and plaintexts..."
-#sudo taskset -c 0-3 ./aes
+sudo taskset -c 0-3 ./aes
 echo "[+] Traces saved to results/traces.csv"
 echo "[+] Plaintexts saved to results/plaintexts.txt"
 # generate hamming weights
 echo "[+] Generating hamming weight model..."
-#./hamming
+./hamming
 echo "[+] Hamming weights saved to results/hamm<i>.csv"
 
 
