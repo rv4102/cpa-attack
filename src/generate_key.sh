@@ -7,6 +7,11 @@ CLAMP1=0
 CLAMP2=0
 TIME_WINDOW1=15
 TIME_WINDOW2=15
+CORRECT_KEY="00000000000000000000000000000000"
+RECOVERED_KEY=""
+NUM_PLAINTEXTS=400
+S=5000
+N=50000
 
 # Stop on errors
 set -e
@@ -37,22 +42,19 @@ echo "[+] Setting power limits"
 
 # Generate traces and plaintexts
 echo "[+] Generating power traces and plaintexts..."
-sudo taskset -c 0-3 ./aes
+sudo taskset -c 0-3 ./aes $NUM_PLAINTEXTS $S $N
 echo "[+] Traces saved to results/traces.csv"
 echo "[+] Plaintexts saved to results/plaintexts.txt"
 # generate hamming weights
 echo "[+] Generating hamming weight model..."
-./hamming
+./hamming $NUM_PLAINTEXTS
 echo "[+] Hamming weights saved to results/hamm<i>.csv"
-
-
-CORRECT_KEY="00000000000000000000000000000000"
 
 # Create directory for results if it doesn't exist
 mkdir -p results
 
-# Full recovered key
-RECOVERED_KEY=""
+# Reset key_ranks.txt
+echo "" > results/key_ranks.txt
 
 
 # Process each byte position
@@ -80,26 +82,24 @@ echo "[+] Guessing entropy results..."
 python3 guessing_entropy.py
 
 # Validate the recovered key if the correct key is known
-if [ "$CORRECT_KEY" != "00000000000000000000000000000000" ]; then
-    if [ "$RECOVERED_KEY" == "$CORRECT_KEY" ]; then
-        echo "[+] SUCCESS: Recovered key matches the correct key!"
-    else
-        echo "[!] WARNING: Recovered key does not match the correct key"
-        echo "    Correct:  $CORRECT_KEY"
-        echo "    Recovered: $RECOVERED_KEY"
-        
-        # Count how many bytes are correct
-        CORRECT_BYTES=0
-        for i in {0..15}; do
-            CORRECT_BYTE=$(echo $CORRECT_KEY | cut -c $((2*i+1))-$((2*i+2)))
-            RECOVERED_BYTE=$(echo $RECOVERED_KEY | cut -c $((2*i+1))-$((2*i+2)))
-            if [ "$CORRECT_BYTE" == "$RECOVERED_BYTE" ]; then
-                CORRECT_BYTES=$((CORRECT_BYTES+1))
-            fi
-        done
-        
-        echo "    Correctly recovered $CORRECT_BYTES out of 16 key bytes"
-    fi
+if [ "$RECOVERED_KEY" == "$CORRECT_KEY" ]; then
+    echo "[+] SUCCESS: Recovered key matches the correct key!"
+else
+    echo "[!] WARNING: Recovered key does not match the correct key"
+    echo "    Correct:  $CORRECT_KEY"
+    echo "    Recovered: $RECOVERED_KEY"
+    
+    # Count how many bytes are correct
+    CORRECT_BYTES=0
+    for i in {0..15}; do
+        CORRECT_BYTE=$(echo $CORRECT_KEY | cut -c $((2*i+1))-$((2*i+2)))
+        RECOVERED_BYTE=$(echo $RECOVERED_KEY | cut -c $((2*i+1))-$((2*i+2)))
+        if [ "$CORRECT_BYTE" == "$RECOVERED_BYTE" ]; then
+            CORRECT_BYTES=$((CORRECT_BYTES+1))
+        fi
+    done
+    
+    echo "    Correctly recovered $CORRECT_BYTES out of 16 key bytes"
 fi
 
 echo "[+] Attack completed. Results saved in the 'results' directory."
