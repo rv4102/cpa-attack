@@ -8,11 +8,6 @@
 #include <pthread.h>
 #include <atomic>
 
-#define S 5000
-#define N 50000
-#ifndef NUM_PT
-#define NUM_PT 400
-#endif
 #define PRINT_EVERY 100
 #define NUM_THREADS 4
 
@@ -24,6 +19,7 @@ std::atomic<bool> start_execution(false);
 
 Ipp8u ptext[17], ctext[17];
 IppsAESSpec* pAES;
+int num_plaintexts, S, N;
 
 
 void* run_workload(void* arg) {
@@ -45,6 +41,15 @@ void* run_workload(void* arg) {
 
 
 int main(int argc, char *argv[]) {
+    if (argc != 4) {
+        perror("Correct format: ./aes <num_plaintext> <S> <N>");
+        exit(1);
+    }
+
+    num_plaintexts = atoi(argv[1]);
+    S = atoi(argv[2]);
+    N = atoi(argv[3]);
+
     std::ofstream plaintexts("results/plaintexts.txt");
     // std::ofstream ciphertexts("results/ciphertexts");
     std::ofstream traces("results/traces.csv");
@@ -72,7 +77,7 @@ int main(int argc, char *argv[]) {
     ippsAESInit(key, sizeof(key)-1, pAES, ctxSize);
     ptext[16] = '\0';
 
-    for (int pt = 0; pt < NUM_PT; pt++) {
+    for (int pt = 0; pt < num_plaintexts; pt++) {
         for (int i = 0; i < 16; i++)
             ptext[i] = 97 + (rand() % 26); // all lowercase letters
         plaintexts << ptext << std::endl;

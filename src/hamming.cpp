@@ -2,12 +2,8 @@
 #include <fstream>
 #include <ippcp.h>
 
-
-#ifndef NUM_PT
-#define NUM_PT 400
-#endif
 #define PRINT_EVERY 100
-
+int num_plaintexts;
 
 uint64_t hammingWeight(Ipp8u byte) {
     uint64_t count = 0;
@@ -20,6 +16,13 @@ uint64_t hammingWeight(Ipp8u byte) {
 
 
 int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        perror("Correct format: ./hamming <num_plaintexts>");
+        exit(1);
+    }
+
+    num_plaintexts = atoi(argv[1]);
+
     // std::ifstream ciphertexts("results/ciphertexts");
     std::ifstream plaintexts("results/plaintexts.txt");
     std::ofstream hamm[16];
@@ -27,7 +30,7 @@ int main(int argc, char *argv[]) {
         hamm[i] = std::ofstream("results/hamm" + std::to_string(i) + ".csv");
     }
 
-    for (int i = 0; i < NUM_PT; i++) {
+    for (int i = 0; i < num_plaintexts; i++) {
         Ipp8u plaintext[17];
         plaintexts >> plaintext;
 
