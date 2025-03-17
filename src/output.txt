@@ -72,5 +72,9 @@ Completed 400
 [+] Full recovered key: 1409002202060c040e1519130f0d160c
 [+] Guessing entropy results...
 Guessing Entropy: 92.74107165645304
+[!] WARNING: Recovered key does not match the correct key
+    Correct:  00000000000000000000000000000000
+    Recovered: 1409002202060c040e1519130f0d160c
+    Correctly recovered 1 out of 16 key bytes
 [+] Attack completed. Results saved in the 'results' directory.
 ==========================================

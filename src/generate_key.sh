@@ -38,24 +38,23 @@ echo "   AES CPA Attack Automation Script       "
 echo "=========================================="
 
 echo "[+] Setting power limits"
-./controller $POWER $POWER $ENABLE1 $ENABLE2 $CLAMP1 $CLAMP2 $TIME_WINDOW1 $TIME_WINDOW2
+#./controller $POWER $POWER $ENABLE1 $ENABLE2 $CLAMP1 $CLAMP2 $TIME_WINDOW1 $TIME_WINDOW2
 
 # Generate traces and plaintexts
 echo "[+] Generating power traces and plaintexts..."
-sudo taskset -c 0-3 ./aes $NUM_PLAINTEXTS $S $N
+#sudo taskset -c 0-3 ./aes $NUM_PLAINTEXTS $S $N
 echo "[+] Traces saved to results/traces.csv"
 echo "[+] Plaintexts saved to results/plaintexts.txt"
 # generate hamming weights
 echo "[+] Generating hamming weight model..."
-./hamming $NUM_PLAINTEXTS
+#./hamming $NUM_PLAINTEXTS
 echo "[+] Hamming weights saved to results/hamm<i>.csv"
 
 # Create directory for results if it doesn't exist
 mkdir -p results
 
 # Reset key_ranks.txt
-echo "" > results/key_ranks.txt
-
+truncate -s 0 results/key_ranks.txt
 
 # Process each byte position
 for i in {0..15}; do
