@@ -9,8 +9,8 @@ TIME_WINDOW1=15
 TIME_WINDOW2=15
 CORRECT_KEY="00000000000000000000000000000000"
 RECOVERED_KEY=""
-NUM_PLAINTEXTS=400
-S=5000
+NUM_PLAINTEXTS=1000
+S=10000
 N=50000
 
 # Stop on errors
@@ -42,12 +42,12 @@ echo "[+] Setting power limits"
 
 # Generate traces and plaintexts
 echo "[+] Generating power traces and plaintexts..."
-#sudo taskset -c 0-3 ./aes $NUM_PLAINTEXTS $S $N
+sudo taskset -c 0-3 ./aes $NUM_PLAINTEXTS $S $N
 echo "[+] Traces saved to results/traces.csv"
 echo "[+] Plaintexts saved to results/plaintexts.txt"
 # generate hamming weights
 echo "[+] Generating hamming weight model..."
-#./hamming $NUM_PLAINTEXTS
+./hamming $NUM_PLAINTEXTS
 echo "[+] Hamming weights saved to results/hamm<i>.csv"
 
 # Create directory for results if it doesn't exist

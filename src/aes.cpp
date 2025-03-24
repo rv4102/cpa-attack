@@ -50,9 +50,9 @@ int main(int argc, char *argv[]) {
     S = atoi(argv[2]);
     N = atoi(argv[3]);
 
-    std::ofstream plaintexts("results/plaintexts.txt");
+    std::ofstream plaintexts("results/plaintexts1.txt");
     // std::ofstream ciphertexts("results/ciphertexts");
-    std::ofstream traces("results/traces.csv");
+    std::ofstream traces("results/traces1.csv");
 
     init();
     srand(time(NULL));
