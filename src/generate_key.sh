@@ -9,8 +9,8 @@ TIME_WINDOW1=15
 TIME_WINDOW2=15
 CORRECT_KEY="00000000000000000000000000000000"
 RECOVERED_KEY=""
-NUM_PLAINTEXTS=400
-S=5000
+NUM_PLAINTEXTS=1000
+S=10000
 N=50000
 
 # Stop on errors
@@ -38,7 +38,7 @@ echo "   AES CPA Attack Automation Script       "
 echo "=========================================="
 
 echo "[+] Setting power limits"
-./controller $POWER $POWER $ENABLE1 $ENABLE2 $CLAMP1 $CLAMP2 $TIME_WINDOW1 $TIME_WINDOW2
+#./controller $POWER $POWER $ENABLE1 $ENABLE2 $CLAMP1 $CLAMP2 $TIME_WINDOW1 $TIME_WINDOW2
 
 # Generate traces and plaintexts
 echo "[+] Generating power traces and plaintexts..."
@@ -54,8 +54,7 @@ echo "[+] Hamming weights saved to results/hamm<i>.csv"
 mkdir -p results
 
 # Reset key_ranks.txt
-echo "" > results/key_ranks.txt
-
+truncate -s 0 results/key_ranks.txt
 
 # Process each byte position
 for i in {0..15}; do
