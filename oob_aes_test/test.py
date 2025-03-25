@@ -5,6 +5,13 @@ import sys
 import numpy as np
 
 
+def extract_hex_to_int(line):
+    parts = line.split()
+    if len(parts) >= 2:
+        return int(parts[1], 16)  # Convert second hex value to an integer
+    return None
+
+
 def filter(readings: pd.DataFrame):
     readings_column = readings.iloc[:, 0]
 
@@ -58,15 +65,18 @@ def freq_plot(data1: pd.DataFrame, data2: pd.DataFrame, name: str) -> None:
 
 
 if __name__ == "__main__":
-    file1 = pd.read_csv(sys.argv[1], header=None)
-    file2 = pd.read_csv(sys.argv[2], header=None)
+    file1 = pd.read_csv(sys.argv[1], header=None, names=["raw"])
+    file2 = pd.read_csv(sys.argv[2], header=None, names=["raw"])
 
-    # filter out the first row
-    file1 = file1.iloc[1:]
-    file2 = file2.iloc[1:]
+    file1["parsed"] = file1["raw"].apply(extract_hex_to_int)
+    file2["parsed"] = file2["raw"].apply(extract_hex_to_int)
 
-    print("TVLA Test Result: ", tvla(file1.values, file2.values))
-    time_series_plot(file1, file2, sys.argv[3])
+    ## filter out the first row
+    #file1 = file1.iloc[1:]
+    #file2 = file2.iloc[1:]
+
+    print("TVLA Test Result: ", tvla(file1["parsed"].values, file2["parsed"].values))
+    time_series_plot(file1["parsed"], file2["parsed"], sys.argv[3])
 
     file1 = filter(file1)
     file2 = filter(file2)
