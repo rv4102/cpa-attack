@@ -10,30 +10,9 @@ def process_readings(input_file, output_file, num_plaintexts, S):
     if len(readings) != num_plaintexts * S:
         print(f"Warning: Expected {num_plaintexts * S} measurements, but got {len(readings)}")
     
-    # Create matrix of traces (one row per plaintext)
-    traces = []
-    for i in range(num_plaintexts):
-        start_idx = i * S
-        end_idx = min(start_idx + S, len(readings))
-        
-        if start_idx < len(readings):
-            if end_idx <= len(readings):
-                trace = readings['energy_difference'][start_idx:end_idx].values
-                traces.append(','.join(map(str, trace)))
-            else:
-                print(f"Warning: Plaintext {i} has incomplete samples")
-                # Use available samples
-                trace = readings['energy_difference'][start_idx:].values
-                # Pad with zeros if needed
-                padding = [0] * (S - len(trace))
-                full_trace = np.concatenate([trace, padding]) if padding else trace
-                traces.append(','.join(map(str, full_trace)))
-    
-    # Write traces to output file
-    with open(output_file, 'w') as f:
-        f.write('\n'.join(traces))
-    
-    print(f"Processed {len(traces)} plaintexts with up to {S} samples each")
+    readings = pd.DataFrame(readings['energy_difference'].to_numpy().reshape(num_plaintexts, S))
+    readings.to_csv(output_file, header=False, index=False)
+
     print(f"Output written to {output_file}")
 
 if __name__ == "__main__":
