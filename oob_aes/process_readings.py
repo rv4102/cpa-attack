@@ -4,24 +4,7 @@ import pandas as pd
 import numpy as np
 
 def process_readings(input_file, output_file, num_plaintexts, S):
-    # Load energy readings
-    try:
-        # Read CSV and convert energy_difference from hex to int if needed
-        readings = pd.read_csv(input_file)
-        
-        # Check if the values appear to be in hex format
-        sample_value = str(readings['energy_difference'].iloc[0]).lower()
-        is_hex = sample_value.startswith('0x') or all(c in '0123456789abcdef' for c in sample_value)
-        
-        if is_hex:
-            # Convert hex strings to integers
-            readings['energy_difference'] = readings['energy_difference'].apply(
-                lambda x: int(str(x), 16) if isinstance(x, str) else int(x)
-            )
-            print("Converted hex values to integers")
-    except Exception as e:
-        print(f"Error processing input file: {e}")
-        sys.exit(1)
+    readings = pd.read_csv(input_file)
     
     # Reshape into matrix form (num_plaintexts x S)
     if len(readings) != num_plaintexts * S:
