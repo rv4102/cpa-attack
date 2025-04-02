@@ -1,47 +1,26 @@
 #!/bin/bash
 
-# Check if script is run as root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root to access MSR"
-  exit 1
-fi
-
-# Check arguments
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <output_file>"
-  exit 1
-fi
-
 OUTPUT_FILE="results/readings.txt"
-MSR_PATH="/dev/cpu/0/msr"
 IA32_PMC0=0xC1
 POLL_INTERVAL=0.0001  # 100µs
-
-# Check if the MSR module is loaded
-if ! lsmod | grep -q "^msr "; then
-  echo "Loading MSR module..."
-  modprobe msr
-  if [ $? -ne 0 ]; then
-    echo "Failed to load MSR module. Are you running a supported kernel?"
-    exit 1
-  fi
-fi
-
-# Check if the MSR device is accessible
-if [ ! -c "$MSR_PATH" ]; then
-  echo "Error: MSR device $MSR_PATH not available"
-  exit 1
-fi
 
 # Function to read MSR
 read_msr() {
   local reg=$1
-  hex_val=$(sudo rdmsr -p 0 -c $reg -f 0:63 2>/dev/null)
+  output=$(peci_cmds RdIAMSR 0x0 $reg 2>/dev/null)
   if [ $? -ne 0 ]; then
-    echo "Error reading MSR $reg" >&2
-    exit 1
+    echo "Error executing peci_cmds" >&2
+    echo "0"
+    return
   fi
-  echo $((0x$hex_val))
+
+  msr_value=$(echo "$output" | sed -n 's/.*0x[0-9a-fA-F]\+ 0x\([0-9a-fA-F]\+\)/\1/p')
+  if [ -z "$msr_value" ]; then
+    echo "Error extracting MSR value from output: $output" >&2
+    echo "0"
+  else
+    echo $((0x$msr_value))
+  fi
 }
 
 # Function to read package energy using peci_cmds
@@ -56,7 +35,7 @@ read_pkg_energy() {
   fi
   
   # Extract the second hex value (energy value)
-  energy_val=$(echo "$output" | grep -oP '0x[0-9a-fA-F]+ 0x\K[0-9a-fA-F]+')
+  energy_val=$(echo "$output" | sed -n 's/.*0x[0-9a-fA-F]\+ 0x\([0-9a-fA-F]\+\)/\1/p')
   if [ -z "$energy_val" ]; then
     echo "Error extracting energy value from output: $output" >&2
     echo "0"

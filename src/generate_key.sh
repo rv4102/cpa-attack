@@ -38,7 +38,7 @@ echo "   AES CPA Attack Automation Script       "
 echo "=========================================="
 
 echo "[+] Setting power limits"
-#./controller $POWER $POWER $ENABLE1 $ENABLE2 $CLAMP1 $CLAMP2 $TIME_WINDOW1 $TIME_WINDOW2
+./controller $POWER $POWER $ENABLE1 $ENABLE2 $CLAMP1 $CLAMP2 $TIME_WINDOW1 $TIME_WINDOW2
 
 # Generate traces and plaintexts
 echo "[+] Generating power traces and plaintexts..."
