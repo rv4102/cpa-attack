@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUTPUT_FILE="results/readings.txt"
+OUTPUT_FILE="results/readings.csv"
 IA32_PMC0=0xC1
 POLL_INTERVAL=0.0001  # 100µs
 
