@@ -2,14 +2,8 @@
 
 CORRECT_KEY="00000000000000000000000000000000"
 OUTPUT_DIR="results"
-READINGS_FILE="results/readings.csv"
 TRACES_FILE="results/traces.csv"
 KEY_RANKS_FILE="results/key_ranks.txt"
-NUM_PLAINTEXTS=50
-S=50
-
-echo "[+] Processing energy readings..."
-python3 -c "import utils; utils.process_readings($READINGS_FILE, $TRACES_FILE, $NUM_PLAINTEXTS, $S)"
 
 # Reset key_ranks.txt
 truncate -s 0 $KEY_RANKS_FILE

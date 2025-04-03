@@ -1,9 +1,10 @@
 #!/bin/bash
 
-NUM_PLAINTEXTS=50
-S=50
+NUM_PLAINTEXTS=100
+S=100
 N=1000
-CPU_ID=0
+READINGS_FILE="results/readings.csv"
+TRACES_FILE="results/traces.csv"
 
 # Stop on errors
 set -e
@@ -127,5 +128,8 @@ pkg_power_limit
 
 # Set CPU affinity to ensure consistent behavior
 echo "[+] Running AES encryption with PMC0 synchronization..."
-sudo taskset -c $CPU_ID ./aes $NUM_PLAINTEXTS $S $N
+sudo taskset -c 0-3 ./aes $NUM_PLAINTEXTS $S $N
 echo "[+] Hamming weights saved to $OUTPUT_DIR/hamm<i>.csv"
+
+echo "[+] Processing energy readings..."
+python3 -c "import utils; utils.process_readings($READINGS_FILE, $TRACES_FILE, $NUM_PLAINTEXTS, $S)"
