@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <vector>
 #include <atomic>
+#include <chrono>
 
 #define PRINT_EVERY 1
 #define NUM_THREADS 4
@@ -76,6 +77,9 @@ int main(int argc, char *argv[]) {
     ippsAESInit(key, sizeof(key)-1, pAES, ctxSize);
     ptext[16] = '\0';
 
+    // Add timer variables to measure total runtime
+    auto total_start_time = std::chrono::high_resolution_clock::now();
+
     for (int pt = 0; pt < num_plaintexts; pt++) {
         for (int i = 0; i < 16; i++)
             ptext[i] = 97 + (rand() % 26); // all lowercase letters
@@ -108,12 +112,12 @@ int main(int argc, char *argv[]) {
             msr_handler.set_PMC0_lsb();
             
             // Small delay to ensure A2 has started measurement
-            usleep(10000); // 10ms delay
+            usleep(100000); // 100ms delay
             start_execution = true;
             while (threads_completed.load() < NUM_THREADS) {
                 // wait for threads to complete
             }
-            usleep(25000); // 25ms delay
+            usleep(500000); // 500ms delay
             // Signal to out-of-band measurement to stop (A2)
             msr_handler.clear_PMC0_lsb();
         
@@ -126,9 +130,15 @@ int main(int argc, char *argv[]) {
             std::cout << "Processed " << pt + 1 << " plaintexts" << std::endl;
     }
 
+    // Calculate total runtime at the end
+    auto total_end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> total_duration = total_end_time - total_start_time;
+    double actual_total_minutes = total_duration.count() / 60.0;
+
     // delete[] pAES;
 
     std::cout << "[+] Finished AES encryption" << std::endl;
+    std::cout << "[+] Total runtime: " << actual_total_minutes << " minutes" << std::endl;
     std::cout << "[+] Generating hamming weight model..." << std::endl;
     
     // Write all plaintexts to file at the end
