@@ -35,6 +35,8 @@ echo "=========================================="
 echo "   AES CPA Attack with MSR Synchronization"
 echo "=========================================="
 
+mkdir -p results
+
 echo "[+] Setting power limits"
 ./controller $POWER $POWER $ENABLE1 $ENABLE2 $CLAMP1 $CLAMP2 $TIME_WINDOW1 $TIME_WINDOW2
 
