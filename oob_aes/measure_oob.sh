@@ -1,10 +1,11 @@
 #!/bin/bash
 
 OUTPUT_FILE="results/readings.csv"
-IA32_PMC0=0xC1
+IA32_PMC0=0xC1 # IA32_PMC0
+PECI_MBX_INDEX_EPI=0x6 # Efficient Performance Indication
 POLL_INTERVAL=0.0001  # 100µs
 
-# Function to read MSR
+
 read_msr() {
   local reg=$1
   output=$(peci_cmds RdIAMSR 0x0 $reg 2>/dev/null)
@@ -23,10 +24,9 @@ read_msr() {
   fi
 }
 
-# Function to read package energy using peci_cmds
+
 read_pkg_energy() {
-  # Extract the energy value (second hex number) from peci_cmds output
-  # Format example: "cc:0x40 0x3ae62b96"
+  local reg=$1
   output=$(peci_cmds RdPkgConfig 0x6 0x00 2>/dev/null)
   if [ $? -ne 0 ]; then
     echo "Error executing peci_cmds" >&2
@@ -35,6 +35,7 @@ read_pkg_energy() {
   fi
   
   # Extract the second hex value (energy value)
+  # Format example: "cc:0x40 0x3ae62b96"
   energy_val=$(echo "$output" | sed -n 's/.*0x[0-9a-fA-F]\+ 0x\([0-9a-fA-F]\+\)/\1/p')
   if [ -z "$energy_val" ]; then
     echo "Error extracting energy value from output: $output" >&2
@@ -47,7 +48,7 @@ read_pkg_energy() {
 echo "Started out-of-band measurement. Press Ctrl+C to stop..."
 
 mkdir -p "results"
-# Create output file with header
+
 echo "measurement_id,energy_difference" > "$OUTPUT_FILE"
 
 # Initialize variables
@@ -56,7 +57,6 @@ start_energy=0
 end_energy=0
 counter=0
 
-# Trap Ctrl+C to clean up
 trap 'echo -e "\nMeasurement stopped. Saved $counter measurements to $OUTPUT_FILE"; exit 0' INT TERM
 
 # Main polling loop
@@ -68,12 +68,12 @@ while true; do
   if [ "$bit_set" -eq 1 ] && [ "$measuring" = false ]; then
     # Start of measurement
     measuring=true
-    start_energy=$(read_pkg_energy)
+    start_energy=$(read_pkg_energy $PECI_MBX_INDEX_EPI)
     echo "Started measurement #$counter with energy: $start_energy"
   elif [ "$bit_set" -eq 0 ] && [ "$measuring" = true ]; then
     # End of measurement
     measuring=false
-    end_energy=$(read_pkg_energy)
+    end_energy=$(read_pkg_energy $PECI_MBX_INDEX_EPI)
     energy_diff=$((end_energy - start_energy))
     
     # Write to the output file
@@ -81,9 +81,6 @@ while true; do
     
     # Increment counter and report progress
     counter=$((counter + 1))
-    if [ $((counter % 10)) -eq 0 ]; then
-      echo "Collected $counter measurements"
-    fi
   fi
   
   # Sleep briefly to reduce CPU usage

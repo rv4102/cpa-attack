@@ -2,20 +2,17 @@
 
 CORRECT_KEY="00000000000000000000000000000000"
 OUTPUT_DIR="results"
+READINGS_FILE="results/readings.csv"
+TRACES_FILE="results/traces.csv"
+KEY_RANKS_FILE="results/key_ranks.txt"
 NUM_PLAINTEXTS=50
 S=50
 
-# Process the energy readings to create trace data
 echo "[+] Processing energy readings..."
-python3 process_readings.py $OUTPUT_DIR/readings.csv $OUTPUT_DIR/traces.csv $NUM_PLAINTEXTS $S
-
-# Generate hamming weights
-echo "[+] Generating hamming weight model..."
-./hamming $NUM_PLAINTEXTS
-echo "[+] Hamming weights saved to $OUTPUT_DIR/hamm<i>.csv"
+python3 -c "import utils; utils.process_readings($READINGS_FILE, $TRACES_FILE, $NUM_PLAINTEXTS, $S)"
 
 # Reset key_ranks.txt
-truncate -s 0 $OUTPUT_DIR/key_ranks.txt
+truncate -s 0 $KEY_RANKS_FILE
 
 # Process each byte position
 RECOVERED_KEY=""
@@ -27,7 +24,7 @@ for i in {0..15}; do
     
     # Run CPA analysis for this byte position
     echo "    Running CPA analysis..."
-    BYTE_RESULT=$(python3 cpa.py $OUTPUT_DIR/traces.csv $OUTPUT_DIR/hamm${i}.csv $CORRECT_BYTE)
+    BYTE_RESULT=$(python3 -c "import utils; utils.cpa($TRACES_FILE, '$OUTPUT_DIR/hamm${i}.csv', $CORRECT_BYTE)"
     
     # Append to the recovered key
     RECOVERED_KEY="${RECOVERED_KEY}${BYTE_RESULT}"
@@ -40,11 +37,11 @@ echo "[+] Full recovered key: $RECOVERED_KEY"
 
 # Compile guessing entropy results
 echo "[+] Guessing entropy results..."
-python3 guessing_entropy.py
+python3 -c "import utils; utils.guessing_entropy($KEY_RANKS_FILE)"
 
 # Validate the recovered key
 if [ "$RECOVERED_KEY" == "$CORRECT_KEY" ]; then
-    echo "[+] SUCCESS: Recovered key matches the correct key!"
+    echo "[+] SUCCESS: Recovered key matches th\e correct key!"
 else
     echo "[!] WARNING: Recovered key does not match the correct key"
     echo "    Correct:  $CORRECT_KEY"

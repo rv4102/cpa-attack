@@ -1,20 +1,35 @@
-import sys
+import math
 import numpy as np
 import pandas as pd
 
 
-def main():
-    if len(sys.argv) != 4:
-        print("Usage: python cpa.py <traces_file> <hamm_file> <correct_key_byte>")
-        sys.exit(1)
+def process_readings(input_file: str, output_file: str, num_plaintexts: int, S: int):
+    num_plaintexts = int(num_plaintexts)
+    S = int(S)
+    readings = pd.read_csv(input_file)
+    
+    # Reshape into matrix form (num_plaintexts x S)
+    if len(readings) != num_plaintexts * S:
+        print(f"Warning: Expected {num_plaintexts * S} measurements, but got {len(readings)}")
+    
+    readings = pd.DataFrame(readings['energy_difference'].to_numpy().reshape(num_plaintexts, S))
+    readings.to_csv(output_file, header=False, index=False)
 
-    traces_file = sys.argv[1]
-    leakages_file = sys.argv[2]
-    correct_key_byte = sys.argv[3]
+    print(f"Output written to {output_file}")
+
+
+def guessing_entropy(key_ranks_file: str):
+    with open(key_ranks_file, "r") as f:
+        key_ranks = f.readlines()
+
+    guessing_entropy = sum([math.log2(float(x)) for x in key_ranks])
+    print(f"Guessing Entropy: {guessing_entropy}")
+
+
+def cpa(traces_file: str, hamming_file: str, key_ranks_file: str, correct_key_byte: int):
     correct_key_byte = int(correct_key_byte, 16)
-
     T = pd.read_csv(traces_file, header=None)
-    H = pd.read_csv(leakages_file, header=None)
+    H = pd.read_csv(hamming_file, header=None)
 
     coeff_shape = [T.shape[1], H.shape[1]]
 
@@ -36,12 +51,8 @@ def main():
     correct_key_byte_index = max_values[max_values == correct_key_byte].index[0]
     correct_key_byte_index += 1  # 1-indexed
 
-    with open("results/key_ranks.txt", "a+") as f:
+    with open(key_ranks_file, "a+") as f:
         f.write(str(correct_key_byte_index) + "\n")
 
     # print Hex value of the guessed key
     print(f"{guessed_key:02x}")
-
-
-if __name__ == "__main__":
-    main()
