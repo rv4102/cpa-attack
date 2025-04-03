@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
             std::cout << "Processed " << pt + 1 << " plaintexts" << std::endl;
     }
 
-    delete[] pAES;
+    // delete[] pAES;
 
     std::cout << "[+] Finished AES encryption" << std::endl;
     std::cout << "[+] Generating hamming weight model..." << std::endl;
