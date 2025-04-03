@@ -1,0 +1,4 @@
+1. nohup sudo ./generate_key.sh < pass.txt
+2. jobs -l (for checking)
+3. disown -h %1
+4. ps aux | grep ./generate_key.sh (for checking)

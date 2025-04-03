@@ -1,4 +1,3 @@
-// msr_handler.h
 #ifndef MSR_HANDLER_H
 #define MSR_HANDLER_H
 
@@ -77,4 +76,4 @@ public:
     }
 };
 
-#endif // MSR_HANDLER_H
+#endif

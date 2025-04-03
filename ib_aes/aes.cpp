@@ -7,6 +7,7 @@
 #include <vector>
 #include <pthread.h>
 #include <atomic>
+#include <chrono>
 
 #define PRINT_EVERY 100
 #define NUM_THREADS 4
@@ -20,6 +21,16 @@ std::atomic<bool> start_execution(false);
 Ipp8u ptext[17], ctext[17];
 IppsAESSpec* pAES;
 int num_plaintexts, S, N;
+
+
+uint64_t hammingWeight(Ipp8u byte) {
+    uint64_t count = 0;
+    while (byte) {
+        count += byte & 1;
+        byte >>= 1;
+    }
+    return count;
+}
 
 
 void* run_workload(void* arg) {
@@ -50,9 +61,9 @@ int main(int argc, char *argv[]) {
     S = atoi(argv[2]);
     N = atoi(argv[3]);
 
-    std::ofstream plaintexts("results/plaintexts1.txt");
+    std::vector<std::string> plaintexts_buffer;
     // std::ofstream ciphertexts("results/ciphertexts");
-    std::ofstream traces("results/traces1.csv");
+    std::ofstream traces("results/traces.csv");
 
     init();
     srand(time(NULL));
@@ -77,10 +88,14 @@ int main(int argc, char *argv[]) {
     ippsAESInit(key, sizeof(key)-1, pAES, ctxSize);
     ptext[16] = '\0';
 
+    // Add timer variables to measure total runtime
+    auto total_start_time = std::chrono::high_resolution_clock::now();
+
     for (int pt = 0; pt < num_plaintexts; pt++) {
         for (int i = 0; i < 16; i++)
             ptext[i] = 97 + (rand() % 26); // all lowercase letters
-        plaintexts << ptext << std::endl;
+
+        plaintexts_buffer.push_back(std::string((char*)ptext));
 
         // warm-up
         __asm__ __volatile__("mfence");
@@ -120,6 +135,43 @@ int main(int argc, char *argv[]) {
 
         if ((pt + 1) % PRINT_EVERY == 0)
             std::cout << "Processed " << pt + 1 << " plaintexts" << std::endl;
+    }
+
+    // Calculate total runtime at the end
+    auto total_end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> total_duration = total_end_time - total_start_time;
+    double actual_total_minutes = total_duration.count() / 60.0;
+
+    std::cout << "[+] Finished AES encryption" << std::endl;
+    std::cout << "[+] Total runtime: " << actual_total_minutes << " minutes" << std::endl;
+    std::cout << "[+] Generating hamming weight model..." << std::endl;
+
+    std::ofstream plaintext_file("results/plaintexts.txt");
+    for (const auto& pt : plaintexts_buffer) {
+        plaintext_file << pt << std::endl;
+    }
+    plaintext_file.close();
+
+    // Open files for hamming weight model
+    std::ofstream hamm[16];
+    for (int i = 0; i < 16; i++) {
+        hamm[i] = std::ofstream("results/hamm" + std::to_string(i) + ".csv");
+    }
+
+    // Process hamming weights directly from buffer rather than reading from file
+    for (int i = 0; i < num_plaintexts; i++) {
+        const std::string& plaintext = plaintexts_buffer[i];
+
+        for (int j = 0; j < 16; j++) {
+            Ipp8u plaintext_byte = plaintext[j];
+            for (int k = 0; k < 256; k++) {
+                Ipp8u key_byte_guess = (Ipp8u) k;
+                hamm[j] << hammingWeight(plaintext_byte ^ key_byte_guess) << ((k < 255) ? "," : "\n");
+            }
+        }
+
+        if((i+1) % PRINT_EVERY == 0)
+            std::cout << "Completed " << (i+1) << std::endl;
     }
 
     return 0;
