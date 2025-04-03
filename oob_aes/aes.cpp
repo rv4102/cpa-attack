@@ -7,6 +7,17 @@
 #include <vector>
 
 #define PRINT_EVERY 1
+#define NUM_THREADS 4
+
+
+std::atomic<int> threads_completed(0);
+std::atomic<int> threads_ready(0);
+std::atomic<bool> start_execution(false);
+
+Ipp8u ptext[17], ctext[17];
+IppsAESSpec* pAES;
+int num_plaintexts, S, N;
+
 
 uint64_t hammingWeight(Ipp8u byte) {
     uint64_t count = 0;
@@ -17,9 +28,24 @@ uint64_t hammingWeight(Ipp8u byte) {
     return count;
 }
 
-Ipp8u ptext[17], ctext[17];
-IppsAESSpec* pAES;
-int num_plaintexts, S, N;
+
+void* run_workload(void* arg) {
+    threads_ready++;
+
+    while (!start_execution.load()) {
+        // Busy wait
+    }
+    
+    __asm__ __volatile__("mfence");
+    for (int i = 0; i < N; ++i) {
+        ippsAESEncryptECB(ptext, ctext, sizeof(ptext), pAES);
+    }
+    __asm__ __volatile__("mfence");
+
+    threads_completed++;
+    return NULL;
+}
+
 
 int main(int argc, char *argv[]) {
     if (argc != 4) {
@@ -33,23 +59,12 @@ int main(int argc, char *argv[]) {
 
     // Create a buffer to store plaintexts instead of writing them immediately
     std::vector<std::string> plaintexts_buffer;
-    
     MSRHandler msr_handler(0); // Using CPU 0
 
     srand(time(NULL));
 
     // Disable PMC0 at the beginning of the attack
     msr_handler.disable_PMC0();
-
-    // warmup
-    for (int s = 0; s < 10; ++s) {
-        __asm__ __volatile__("mfence");
-        for (int i = 0; i < N; ++i) {
-            __asm__ __volatile__("nop");
-            __asm__ __volatile__("mfence");
-        }
-        __asm__ __volatile__("mfence");
-    }
 
     Ipp8u key[17];
     memset(key, 0x00, sizeof(key));
@@ -64,7 +79,6 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < 16; i++)
             ptext[i] = 97 + (rand() % 26); // all lowercase letters
         
-        // Store plaintext in buffer instead of writing to file
         plaintexts_buffer.push_back(std::string((char*)ptext));
 
         // warm-up
@@ -76,24 +90,35 @@ int main(int argc, char *argv[]) {
 
         // measurement
         for (int s = 0; s < S; ++s) {
+            threads_completed = 0;
+            threads_ready = 0;
+            start_execution = false;
+            
+            std::vector<pthread_t> threads(NUM_THREADS);
+            for(int t = 0; t < NUM_THREADS; ++t) {
+                pthread_create(&threads[t], NULL, run_workload, NULL);
+            }
+
+            while (threads_ready.load() < NUM_THREADS) {
+                // wait for threads to be ready
+            }
+
             // Signal to out-of-band measurement to start (A2)
             msr_handler.set_PMC0_lsb();
             
             // Small delay to ensure A2 has started measurement
-            usleep(500000); // 500ms delay
-            
-            // Execute AES encryption
-            __asm__ __volatile__("mfence");
-            for (int i = 0; i < N; ++i) {
-                ippsAESEncryptECB(ptext, ctext, sizeof(ptext)-1, pAES);
+            usleep(10000); // 10ms delay
+            start_execution = true;
+            while (threads_completed.load() < NUM_THREADS) {
+                // wait for threads to complete
             }
-            __asm__ __volatile__("mfence");
-            
+            usleep(25000); // 25ms delay
             // Signal to out-of-band measurement to stop (A2)
             msr_handler.clear_PMC0_lsb();
-            
-            // Add a small delay between iterations
-            usleep(2500000); // 2500ms delay
+        
+            for (int t = 0; t < NUM_THREADS; ++t) {
+                pthread_join(threads[t], NULL);
+            }
         }
 
         if ((pt + 1) % PRINT_EVERY == 0)
