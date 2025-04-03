@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <vector>
+#include <atomic>
 
 #define PRINT_EVERY 1
 #define NUM_THREADS 4
