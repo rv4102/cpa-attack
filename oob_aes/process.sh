@@ -2,12 +2,12 @@
 
 CORRECT_KEY="00000000000000000000000000000000"
 OUTPUT_DIR="results"
-NUM_PLAINTEXTS=100
-S=100
+NUM_PLAINTEXTS=50
+S=50
 
 # Process the energy readings to create trace data
 echo "[+] Processing energy readings..."
-python3 process_readings.py $OUTPUT_DIR/energy_readings.csv $OUTPUT_DIR/traces.csv $NUM_PLAINTEXTS $S
+python3 process_readings.py $OUTPUT_DIR/readings.csv $OUTPUT_DIR/traces.csv $NUM_PLAINTEXTS $S
 
 # Generate hamming weights
 echo "[+] Generating hamming weight model..."

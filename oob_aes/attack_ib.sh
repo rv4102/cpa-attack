@@ -7,8 +7,8 @@ CLAMP1=0
 CLAMP2=0
 TIME_WINDOW1=15
 TIME_WINDOW2=15
-NUM_PLAINTEXTS=100
-S=100  # Reduced number of samples per plaintext
+NUM_PLAINTEXTS=50
+S=50  # Reduced number of samples per plaintext
 N=1000  # Reduced number of AES operations per sample
 CPU_ID=0
 

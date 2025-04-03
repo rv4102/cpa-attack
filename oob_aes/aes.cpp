@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PRINT_EVERY 100
+#define PRINT_EVERY 1
 
 Ipp8u ptext[17], ctext[17];
 IppsAESSpec* pAES;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
             msr_handler.set_PMC0_lsb();
             
             // Small delay to ensure A2 has started measurement
-            usleep(1000); // 1ms delay
+            usleep(500000); // 500ms delay
             
             // Execute AES encryption
             __asm__ __volatile__("mfence");
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
             msr_handler.clear_PMC0_lsb();
             
             // Add a small delay between iterations
-            usleep(5000); // 5ms delay
+            usleep(2500000); // 2500ms delay
         }
 
         if ((pt + 1) % PRINT_EVERY == 0)
