@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
             while (threads_completed.load() < NUM_THREADS) {
                 // wait for threads to complete
             }
-            usleep(500000); // 500ms delay
+            usleep(2000000); // 2s delay
             // Signal to out-of-band measurement to stop (A2)
             msr_handler.clear_PMC0_lsb();
         
