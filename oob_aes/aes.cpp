@@ -112,12 +112,12 @@ int main(int argc, char *argv[]) {
             msr_handler.set_PMC0_lsb();
             
             // Small delay to ensure A2 has started measurement
-            usleep(2*100000); // 2*100ms delay
+            usleep(2000000); // 2s delay
             start_execution = true;
             while (threads_completed.load() < NUM_THREADS) {
                 // wait for threads to complete
             }
-            usleep(2*2000000); // 2*2s delay
+            usleep(5000000); // 5s delay
             // Signal to out-of-band measurement to stop (A2)
             msr_handler.clear_PMC0_lsb();
         
