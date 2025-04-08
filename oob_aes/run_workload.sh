@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NUM_PLAINTEXTS=100
+NUM_PLAINTEXTS=150
 S=100
 N=1000
 READINGS_FILE="results/readings.csv"

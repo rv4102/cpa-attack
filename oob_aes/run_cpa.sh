@@ -18,7 +18,7 @@ for i in {0..15}; do
     
     # Run CPA analysis for this byte position
     echo "    Running CPA analysis..."
-    BYTE_RESULT=$(python3 -c "import utils; utils.cpa($TRACES_FILE, '$OUTPUT_DIR/hamm${i}.csv', $CORRECT_BYTE)"
+    BYTE_RESULT=$(python3 -c "import utils; utils.cpa('results/traces.csv', 'results/hamm${i}.csv', 'results/key_ranks.txt', '$CORRECT_BYTE')")
     
     # Append to the recovered key
     RECOVERED_KEY="${RECOVERED_KEY}${BYTE_RESULT}"
