@@ -8,39 +8,46 @@ POLL_INTERVAL=0.0001  # 100µs
 
 read_msr() {
   local reg=$1
-  local max_attempts=5  # Maximum number of retry attempts
-  local attempt=1
+  local max_retries=5  # Maximum number of retry attempts
+  local retry_count=0
+  local success=false
   
-  while [ $attempt -le $max_attempts ]; do
+  while [ $retry_count -lt $max_retries ] && [ "$success" = false ]; do
     output=$(peci_cmds RdIAMSR 0x0 $reg 2>/dev/null)
-    status=$?
-    
-    if [ $status -eq 0 ]; then
-      msr_value=$(echo "$output" | sed -n 's/.*0x[0-9a-fA-F]\+ 0x\([0-9a-fA-F]\+\)/\1/p')
-      
-      if [ -n "$msr_value" ]; then
-        # Success - return the value
-        echo $((0x$msr_value))
-        return 0
-      else
-        echo "Attempt $attempt: Error extracting MSR value from output: $output" >&2
-      fi
+    if [ $? -ne 0 ]; then
+      echo "Error executing peci_cmds, retrying ($((retry_count+1))/$max_retries)..." >&2
+      retry_count=$((retry_count+1))
+      continue
+    fi
+
+    # Check if status code is 0x40 (success)
+    status_code=$(echo "$output" | sed -n 's/cc:0x\([0-9a-fA-F]\+\).*/\1/p' | tr -d '[:space:]')
+    if [ "$status_code" = "40" ]; then
+      success=true
     else
-      echo "Attempt $attempt: Error executing peci_cmds (status=$status)" >&2
+      echo "Command returned status 0x$status_code instead of 0x40, retrying ($((retry_count+1))/$max_retries)..." >&2
+      retry_count=$((retry_count+1))
+      continue
     fi
     
-    # If we get here, either the command failed or we couldn't extract the value
-    if [ $attempt -lt $max_attempts ]; then
-      echo "Retrying in $delay seconds..." >&2
+    # Extract the second hex value (MSR value)
+    # Format example: "cc:0x40 0x3ae62b96"
+    msr_val=$(echo "$output" | sed -n 's/.*0x[0-9a-fA-F]\+ 0x\([0-9a-fA-F]\+\)/\1/p')
+    if [ -z "$msr_val" ]; then
+      echo "Error extracting energy value from output: $output" >&2
+      echo "0"
+      return
+    else
+      echo $((0x$msr_val))
+      return
     fi
-    
-    attempt=$((attempt + 1))
   done
   
-  # If we've exhausted all attempts
-  echo "Failed to read MSR after $max_attempts attempts" >&2
-  echo "0"
-  return 1
+  # If we've reached here, we've exhausted all retries
+  if [ "$success" = false ]; then
+    echo "Failed to read package energy after $max_retries attempts" >&2
+    echo "0"
+  fi
 }
 
 
@@ -59,11 +66,11 @@ read_pkg_energy() {
     fi
     
     # Check if status code is 0x40 (success)
-    status_code=$(echo "$output" | sed -n 's/cc:0x\([0-9a-fA-F]\+\).*/\1/p')
+    status_code=$(echo "$output" | sed -n 's/cc:0x\([0-9a-fA-F]\+\).*/\1/p' | tr -d '[:space:]')
     if [ "$status_code" = "40" ]; then
       success=true
     else
-      echo "Command returned status $status_code instead of 0x40, retrying ($((retry_count+1))/$max_retries)..." >&2
+      echo "Command returned status 0x$status_code instead of 0x40, retrying ($((retry_count+1))/$max_retries)..." >&2
       retry_count=$((retry_count+1))
       continue
     fi
